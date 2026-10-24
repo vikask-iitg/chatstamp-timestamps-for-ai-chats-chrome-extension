@@ -25,7 +25,7 @@ Click the toolbar icon to search chat titles across both sites, filter by site a
 
 Each message gets its date and time just above it: on the right for your messages, on the left for replies.
 
-<img src="docs/screenshots/chatgpt-messages.png" width="500" alt="A ChatGPT conversation with 23 Sep 2026, 9:10 PM shown above the user's message on the right and above ChatGPT's reply on the left">
+<img src="docs/screenshots/chatgpt-messages.png" width="700" alt="A ChatGPT conversation on desktop: 23 Oct 2026, 3:46 PM shown above the user's message on the right and above ChatGPT's reply on the left">
 
 ### Message times in Claude
 
