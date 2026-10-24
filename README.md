@@ -6,6 +6,12 @@ A Chrome extension (Manifest V3) that shows when each chat started in the ChatGP
 
 ## Screenshots
 
+### Chat start times in the sidebar
+
+Every chat in the sidebar shows when it started: the time for today, "Yesterday" or the weekday for this week, and the date for older chats. Hover a label for the full date and time.
+
+<img src="docs/screenshots/chatgpt-sidebar.png" width="390" alt="ChatGPT sidebar where each recent chat shows its start time on the right, such as Yesterday 3:17 PM, Wed 2:53 PM, Tue 10:54 PM and 15 Oct, 6:54 PM">
+
 ### Search popup
 
 Click the toolbar icon to search chat titles across both sites, filter by site and date range, and group by day or month. Light mode is the default; the switch in the header turns on dark mode.
