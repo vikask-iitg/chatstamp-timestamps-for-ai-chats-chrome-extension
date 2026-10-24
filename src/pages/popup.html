@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <title>ChatStamp</title>
+  <script src="theme.js"></script>
+  <link rel="stylesheet" href="pages.css">
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body class="popup">
+  <header class="topbar">
+    <img src="../../icons/icon32.png" width="24" height="24" alt="">
+    <div class="brand">
+      <h1>ChatStamp: Timestamps for AI Chats</h1>
+      <p id="summary" role="status"></p>
+    </div>
+    <button type="button" class="theme-switch" id="toggleTheme" role="switch" aria-checked="false" aria-label="Dark mode" title="Dark mode">
+      <span class="knob">
+        <svg class="icon-sun" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="4"/>
+          <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>
+        </svg>
+        <svg class="icon-moon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>
+        </svg>
+      </span>
+    </button>
+    <button type="button" class="icon-button" id="openSettings" title="Settings, export and import" aria-label="Settings, export and import">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
+  </header>
+
+  <section class="controls">
+    <div class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
+      </svg>
+      <input type="search" id="text" placeholder="Search chat titles" aria-label="Search chat titles" autocomplete="off" autofocus>
+    </div>
+
+    <div class="segmented" id="platform" role="group" aria-label="Site">
+      <button type="button" data-platform="" aria-pressed="true">All</button>
+      <button type="button" data-platform="chatgpt" aria-pressed="false"><img class="logo" src="../../icons/sites/chatgpt.png" width="14" height="14" alt="">ChatGPT</button>
+      <button type="button" data-platform="claude" aria-pressed="false"><img class="logo" src="../../icons/sites/claude.png" width="14" height="14" alt="">Claude</button>
+    </div>
+
+    <div class="selects">
+      <select id="range" aria-label="Date range">
+        <option value="all">Any time</option>
+        <option value="today">Today</option>
+        <option value="7d">Last 7 days</option>
+        <option value="30d">Last 30 days</option>
+        <option value="custom">Custom range…</option>
+      </select>
+      <select id="groupBy" aria-label="Group by">
+        <option value="day">Group by day</option>
+        <option value="month">Group by month</option>
+        <option value="none">No grouping</option>
+      </select>
+    </div>
+
+    <div class="date-range" id="customRange" hidden>
+      <label><span>From</span><input type="date" id="from"></label>
+      <label><span>To</span><input type="date" id="to"></label>
+      <button type="button" class="button primary" id="applyDates">Search</button>
+      <button type="button" class="button icon-only" id="clearDates" title="Clear dates" aria-label="Clear dates">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <p class="date-error" id="dateError" role="alert" hidden></p>
+  </section>
+
+  <main id="results"></main>
+
+  <script src="../shared/core.js"></script>
+  <script src="../shared/format.js"></script>
+  <script src="../shared/storage.js"></script>
+  <script src="../shared/search.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

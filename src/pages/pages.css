@@ -1,0 +1,98 @@
+:root {
+  --bg: #faf9f7;
+  --surface: #ffffff;
+  --text: #1f1e1c;
+  --muted: #6b6862;
+  --border: #e4e1db;
+  --accent: #2f6fdb;
+  --danger: #c0392b;
+  color-scheme: light;
+}
+
+/* Popup and settings set data-theme from the user's choice (light by default).
+   Pages without it, like the welcome page, follow the system theme. */
+:root[data-theme='dark'] {
+  --bg: #1b1a19;
+  --surface: #252422;
+  --text: #ecebe8;
+  --muted: #a19e97;
+  --border: #3a3835;
+  --accent: #7aa7f5;
+  --danger: #ef7a6c;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --bg: #1b1a19;
+    --surface: #252422;
+    --text: #ecebe8;
+    --muted: #a19e97;
+    --border: #3a3835;
+    --accent: #7aa7f5;
+    --danger: #ef7a6c;
+    color-scheme: dark;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 15px/1.55 system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+main {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 48px 16px 64px;
+}
+
+h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -0.01em; }
+h2 { font-size: 15px; margin: 0 0 12px; }
+p { margin: 0 0 12px; }
+.lede { color: var(--muted); margin-bottom: 28px; }
+.muted { color: var(--muted); font-size: 13px; }
+
+section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+}
+.row + .row { border-top: 1px solid var(--border); }
+
+select, button {
+  font: inherit;
+  color: inherit;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+}
+button { cursor: pointer; }
+button.danger { color: var(--danger); border-color: currentColor; background: transparent; }
+input[type='checkbox'] { width: 18px; height: 18px; accent-color: var(--accent); }
+
+.sample {
+  display: inline-block;
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+ul { padding-left: 20px; margin: 0 0 12px; }
+li { margin-bottom: 6px; }
+a { color: var(--accent); }
+.status { min-height: 1.4em; font-size: 13px; color: var(--muted); }

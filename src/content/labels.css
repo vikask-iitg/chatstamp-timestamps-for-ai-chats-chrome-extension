@@ -1,0 +1,69 @@
+/* Sidebar date labels. `color: inherit` plus reduced opacity follows each
+   site's light and dark theme automatically. */
+.chatstamp {
+  flex: none;
+  margin-left: 6px;
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 400;
+  color: inherit;
+  opacity: 0.72;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  pointer-events: auto;
+}
+
+.chatstamp--end {
+  margin-left: auto;
+  padding-left: 8px;
+}
+
+.chatstamp--estimated {
+  font-style: italic;
+}
+
+/* Date and time on each message inside a chat: above it, or below it on sites
+   that set messageLabelPosition to 'end'. Right-aligned for the user, left for replies. */
+.chatstamp-msg {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  line-height: 1.3;
+  font-weight: 400;
+  font-style: normal;
+  color: inherit;
+  opacity: 0.55;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+  user-select: none;
+}
+
+.chatstamp-msg:first-child {
+  margin-top: 0;
+  margin-bottom: 4px;
+}
+
+.chatstamp-msg--user {
+  align-self: flex-end;
+  text-align: right;
+}
+
+.chatstamp-msg--assistant {
+  align-self: flex-start;
+  text-align: left;
+}
+
+/* Visually hidden text that screen readers include in the link's name. */
+.chatstamp .chatstamp-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}

@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ChatStamp settings</title>
+  <script src="theme.js"></script>
+  <link rel="stylesheet" href="pages.css">
+</head>
+<body>
+  <main>
+    <h1>ChatStamp</h1>
+    <p class="lede">Settings are saved as you change them. Everything is stored only in this browser.</p>
+
+    <section>
+      <h2>Date display</h2>
+      <div class="row">
+        <label for="dateFormat">Label format</label>
+        <select id="dateFormat">
+          <option value="datetime">Smart date and time (Wed 4:30 PM, 12 Mar, 4:30 PM)</option>
+          <option value="auto">Relative for the last week, then date</option>
+          <option value="relative">Always relative (3w ago)</option>
+          <option value="absolute">Always date (12 Mar 2026)</option>
+        </select>
+      </div>
+      <div class="row">
+        <label for="theme">Theme</label>
+        <select id="theme">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+      <div class="row">
+        <label for="clock">Clock</label>
+        <select id="clock">
+          <option value="12">12-hour (4:30 PM)</option>
+          <option value="24">24-hour (16:30)</option>
+        </select>
+      </div>
+      <div class="row">
+        <label for="messageTimes">Show date and time on each message</label>
+        <input type="checkbox" id="messageTimes">
+      </div>
+      <div class="row">
+        <span class="muted">Preview</span>
+        <span class="sample" id="preview"></span>
+      </div>
+    </section>
+
+    <section>
+      <h2>Sites</h2>
+      <div class="row">
+        <label for="enabled-chatgpt">ChatGPT <span class="muted" id="count-chatgpt"></span></label>
+        <input type="checkbox" id="enabled-chatgpt" data-platform="chatgpt">
+      </div>
+      <div class="row">
+        <label for="enabled-claude">Claude <span class="muted" id="count-claude"></span></label>
+        <input type="checkbox" id="enabled-claude" data-platform="claude">
+      </div>
+    </section>
+
+    <section>
+      <h2>Your data</h2>
+      <p class="muted">The extension stores only each chat's site, ID, title and dates. It never stores message text and never sends anything off your device.</p>
+      <div class="row">
+        <span>Download every stored chat date as a JSON file</span>
+        <button id="export">Export</button>
+      </div>
+      <div class="row">
+        <span>Add chat dates from an export file. Existing dates are kept unless the file has better ones.</span>
+        <button id="import">Import…</button>
+        <input type="file" id="importFile" accept="application/json,.json" hidden>
+      </div>
+      <div class="row">
+        <span>Delete every stored date and reset settings</span>
+        <button class="danger" id="clear">Clear all data</button>
+      </div>
+      <p class="status" id="status" role="status"></p>
+    </section>
+
+    <p class="muted"><a href="welcome.html">About this extension</a> · <a href="../../PRIVACY.md">Privacy policy</a></p>
+  </main>
+  <script src="../shared/core.js"></script>
+  <script src="../shared/format.js"></script>
+  <script src="../shared/storage.js"></script>
+  <script src="../shared/search.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>
