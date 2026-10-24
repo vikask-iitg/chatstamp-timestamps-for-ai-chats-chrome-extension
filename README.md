@@ -31,7 +31,7 @@ Each message gets its date and time just above it: on the right for your message
 
 Your messages show the time on the right at the top of the bubble; Claude's replies show it on the left.
 
-<img src="docs/screenshots/claude-messages.png" width="560" alt="A Claude conversation: the user's message 'Can you help me plan a weekend trip to Jaipur?' with 24 Oct 2026, 5:30 PM at the top right of the bubble, and Claude's reply with 24 Oct 2026, 5:31 PM above it on the left">
+<img src="docs/screenshots/claude-messages.png" width="700" alt="A Claude conversation on desktop: 24 Oct 2026, 6:06 PM shown at the top right of the user's message 'How does a VPN works' and above Claude's reply on the left">
 
 ## Load it
 
