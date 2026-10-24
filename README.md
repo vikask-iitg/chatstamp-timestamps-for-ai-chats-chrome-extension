@@ -1,5 +1,7 @@
 # ChatStamp: Timestamps for AI Chats
 
+> **Chrome Extension** for ChatGPT and Claude · Manifest V3 · No build step · All data stays on your device
+
 A Chrome extension (Manifest V3) that shows when each chat started in the ChatGPT and Claude sidebars, puts a date and time on every message, and lets you search your chats by title, site and date. No server, no account: all data stays in `chrome.storage.local`.
 
 ## Screenshots
