@@ -109,12 +109,4 @@ Labels disappearing usually means a selector broke. Fix it in that site's file i
 - [ ] Clear all data removes every label
 - [ ] Block the metadata endpoint in DevTools (Network → Block request URL); the site still works and opened chats get `~` dates
 
-## Not built yet (from the PRD)
-
-- Store listing assets and screenshots.
-
-Gemini support was removed in 0.3.0: Gemini exposes no creation times, so it could only show first-seen estimates for chats opened after install.
-
-The v1.1 popup is plain JavaScript rather than React, so the extension still has no build step.
-
 See `PRIVACY.md` for the privacy policy.
