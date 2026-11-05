@@ -24,6 +24,7 @@
     clock: '12', // '12' | '24'
     groupBy: 'day', // popup grouping: 'day' | 'month' | 'none'
     theme: 'light', // popup and settings pages: 'light' | 'dark'
+    timestamps: true, // master switch: false hides every label on the chat sites
     messageTimes: true, // show a date and time on each message inside a chat
     enabled: { chatgpt: true, claude: true },
   };

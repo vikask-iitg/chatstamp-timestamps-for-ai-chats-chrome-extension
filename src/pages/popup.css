@@ -3,7 +3,7 @@ body.popup {
   --field: color-mix(in srgb, var(--text) 5%, var(--surface));
   --hover: color-mix(in srgb, var(--text) 6%, transparent);
   --soft-accent: color-mix(in srgb, var(--accent) 14%, transparent);
-  width: 440px;
+  width: 490px;
   height: 580px;
   display: flex;
   flex-direction: column;
@@ -47,7 +47,8 @@ button { font: inherit; }
 
 /* Theme toggle shows the moon in light mode and the sun in dark mode. */
 /* Light/dark switch: knob shows a sun on the left in light mode, a moon on the right in dark. */
-.theme-switch {
+.theme-switch,
+.power-switch {
   position: relative;
   flex: none;
   width: 46px;
@@ -61,8 +62,10 @@ button { font: inherit; }
   cursor: pointer;
   transition: background-color 200ms;
 }
-.theme-switch:hover { box-shadow: inset 0 0 0 1px var(--muted); }
-.theme-switch .knob {
+.theme-switch:hover,
+.power-switch:hover { box-shadow: inset 0 0 0 1px var(--muted); }
+.theme-switch .knob,
+.power-switch .knob {
   position: absolute;
   top: 3px;
   left: 3px;
@@ -78,11 +81,17 @@ button { font: inherit; }
 }
 .theme-switch[aria-checked='true'] { background: var(--accent); box-shadow: none; }
 .theme-switch[aria-checked='true'] .knob { transform: translateX(20px); background: #1b1a19; color: #fff; }
+/* Timestamps on/off: green with the knob right when on, grey with it left when off.
+   It only animates after a click, so it doesn't slide when the popup opens. */
+.power-switch .knob { color: #8a8a86; transition: none; }
+.power-switch[aria-checked='true'] { background: #16a34a; box-shadow: none; }
+.power-switch[aria-checked='true'] .knob { transform: translateX(20px); color: #16a34a; }
+.power-switch.animate, .power-switch.animate .knob { transition: transform 200ms ease, background-color 200ms, color 200ms; }
 .icon-moon { display: none; }
 .theme-switch[aria-checked='true'] .icon-sun { display: none; }
 .theme-switch[aria-checked='true'] .icon-moon { display: block; }
 @media (prefers-reduced-motion: reduce) {
-  .theme-switch, .theme-switch .knob { transition: none; }
+  .theme-switch, .theme-switch .knob, .power-switch.animate, .power-switch.animate .knob { transition: none; }
 }
 [data-theme='dark'] .button.primary { color: #10131a; }
 

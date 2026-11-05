@@ -14,7 +14,7 @@ Every chat in the sidebar shows when it started: the time for today, "Yesterday"
 
 ### Search popup
 
-Click the toolbar icon to search chat titles across both sites, filter by site and date range, and group by day or month. Light mode is the default; the switch in the header turns on dark mode.
+Click the toolbar icon to search chat titles across both sites, filter by site and date range, and group by day or month. Two switches sit in the header: one turns all timestamps on the chat sites on or off, the other switches between light and dark mode (light is the default).
 
 <p>
   <img src="docs/screenshots/popup-light.png" width="380" alt="ChatStamp popup in light mode, listing chats from ChatGPT and Claude grouped under Today and Yesterday, each with its site logo and time">
@@ -106,6 +106,7 @@ Labels disappearing usually means a selector broke. Fix it in that site's file i
 - [ ] Open a chat: every message shows its date and time (AM/PM by default); hover shows seconds
 - [ ] Send a new message: its time appears within about 10 seconds
 - [ ] Settings: unticking "Show date and time on each message" removes them
+- [ ] Popup timestamps switch: off removes sidebar and message labels from open tabs without a reload, on brings them back; the popup still lists chats and says "timestamps off"
 - [ ] Clear all data removes every label
 - [ ] Block the metadata endpoint in DevTools (Network → Block request URL); the site still works and opened chats get `~` dates
 

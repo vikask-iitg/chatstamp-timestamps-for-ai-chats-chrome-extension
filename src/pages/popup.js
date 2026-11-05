@@ -120,6 +120,7 @@
       : matches.length === total
         ? `${total} ${total === 1 ? 'chat' : 'chats'}`
         : `${matches.length} of ${total} chats${matches.length > shown.length ? `, newest ${shown.length} shown` : ''}`;
+    if (settings.timestamps === false) $('summary').textContent += `${total ? ' · ' : ', '}timestamps off`;
 
     if (!total) {
       results.append(emptyState('No chats recorded yet', 'Open ChatGPT or Claude and your sidebar chats will appear here.'));
@@ -176,6 +177,14 @@
     showDateError('');
   }
 
+  function renderTimestampsSwitch() {
+    const on = settings.timestamps !== false;
+    $('toggleTimestamps').setAttribute('aria-checked', String(on));
+    $('toggleTimestamps').title = on
+      ? 'Timestamps on: click to hide them on ChatGPT and Claude'
+      : 'Timestamps off: click to show them on ChatGPT and Claude';
+  }
+
   function renderThemeButton() {
     $('toggleTheme').setAttribute('aria-checked', String(settings.theme === 'dark'));
   }
@@ -215,6 +224,13 @@
     await ChatStamp.storage.saveSettings(settings);
   });
 
+  $('toggleTimestamps').addEventListener('click', async () => {
+    settings.timestamps = settings.timestamps === false;
+    $('toggleTimestamps').classList.add('animate');
+    renderTimestampsSwitch();
+    render();
+    await ChatStamp.storage.saveSettings(settings);
+  });
   $('toggleTheme').addEventListener('click', async () => {
     settings.theme = settings.theme === 'dark' ? 'light' : 'dark';
     ChatStampTheme.set(settings.theme);
@@ -231,6 +247,7 @@
     records = await ChatStamp.storage.getRecords();
     ChatStampTheme.set(settings.theme);
     renderThemeButton();
+    renderTimestampsSwitch();
     $('groupBy').value = settings.groupBy;
     restoreQuery();
     render();

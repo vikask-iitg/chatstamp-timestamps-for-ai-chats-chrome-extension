@@ -104,6 +104,14 @@
     $('status').textContent = 'All data cleared.';
   });
 
+  // The popup can change settings while this page is open; stay current so saving
+  // here doesn't overwrite them with old values.
+  chrome.storage.onChanged.addListener(async (changes, area) => {
+    if (area !== 'local' || !changes[ChatStamp.storage.SETTINGS_KEY]) return;
+    settings = await ChatStamp.storage.getSettings();
+    renderForm();
+  });
+
   (async () => {
     settings = await ChatStamp.storage.getSettings();
     renderForm();

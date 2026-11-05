@@ -48,7 +48,7 @@
 
   function apply(state, collector) {
     const { adapter, settings, records } = state;
-    if (settings.enabled[adapter.id] === false) {
+    if (settings.timestamps === false || settings.enabled[adapter.id] === false) {
       removeAll();
       return;
     }

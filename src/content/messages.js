@@ -22,7 +22,9 @@
 
     const supported = () => adapter.messageElements && adapter.fetchMessageTimes;
     const enabled = () =>
-      state.settings.messageTimes !== false && state.settings.enabled[adapter.id] !== false;
+      state.settings.timestamps !== false &&
+      state.settings.messageTimes !== false &&
+      state.settings.enabled[adapter.id] !== false;
 
     function removeAll() {
       document.querySelectorAll(`.${LABEL_CLASS}`).forEach((label) => label.remove());

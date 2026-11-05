@@ -175,3 +175,33 @@ test('message branch walk and tooltip time with seconds', () => {
   assert.strictEqual(ChatStamp.format.formatTimeSeconds(ms, '24'), '15:21:48');
   assert.strictEqual(ChatStamp.format.formatDateTime(ms, '12'), '27 Jul 2025, 3:21 PM');
 });
+
+test('the timestamps switch removes sidebar and message labels', () => {
+  const removed = [];
+  const label = (name) => ({ remove: () => removed.push(name) });
+  sandbox.document = {
+    querySelectorAll: (selector) => {
+      if (selector === '.chatstamp') return [label('sidebar')];
+      if (selector === '.chatstamp-msg') return [label('message')];
+      return [];
+    },
+  };
+  for (const file of ['injector.js', 'messages.js']) {
+    const src = fs.readFileSync(path.join(__dirname, '..', 'src', 'content', file), 'utf8');
+    vm.runInContext(src, sandbox, { filename: file });
+  }
+
+  const adapter = {
+    id: 'claude',
+    linkSelectors: [],
+    messageElements: () => assert.fail('should not look for messages while off'),
+    fetchMessageTimes: () => assert.fail('should not fetch times while off'),
+  };
+  const state = { adapter, records: new Map(), settings: { ...settings, timestamps: false } };
+  ChatStamp.injector.apply(state, {});
+  const stamper = ChatStamp.createMessageStamper(state);
+  stamper.onRoute('chat-1');
+  stamper.apply();
+  assert.deepStrictEqual(removed, ['sidebar', 'message']);
+  assert.strictEqual(ChatStamp.DEFAULT_SETTINGS.timestamps, true);
+});
