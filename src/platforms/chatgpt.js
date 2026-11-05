@@ -23,6 +23,65 @@
   const MESSAGE_SELECTOR = '[data-message-id][data-message-author-role]';
   const SHOWN_ROLES = new Set(['user', 'assistant']);
 
+  async function loadBranch(chatId) {
+    const token = await getAccessToken();
+    const res = await fetch(`/backend-api/conversation/${encodeURIComponent(chatId)}`, {
+      credentials: 'include',
+      headers: { Authorization: `Bearer ${token}` },
+      signal: ChatStamp.timeoutSignal(),
+    });
+    if (!res.ok) throw new Error(`conversation ${res.status}`);
+    const data = await res.json();
+    return ChatStamp.walkBranch(data.mapping || {}, data.current_node, (node) => node.parent);
+  }
+
+  // The readable text and image references of a message. Tool calls, hidden context and
+  // model reasoning have neither here, so those messages come back empty and are skipped.
+  function messageParts(message) {
+    const content = message.content || {};
+    if (content.content_type === 'code') return { text: `\`\`\`\n${content.text || ''}\n\`\`\``, pointers: [] };
+    if (content.content_type !== 'text' && content.content_type !== 'multimodal_text') return { text: '', pointers: [] };
+    const parts = content.parts || [];
+    return {
+      text: parts.filter((part) => typeof part === 'string' && part).join('\n\n'),
+      pointers: parts.filter((part) => part && part.content_type === 'image_asset_pointer').map((part) => part.asset_pointer),
+    };
+  }
+
+  // Uploaded and generated images use different file addresses; both give a temporary link.
+  async function loadPointer(pointer, chatId) {
+    const fileId = String(pointer || '').replace(/^[\w-]+:\/\//, '');
+    if (!fileId) return null;
+    const token = await getAccessToken();
+    const headers = { Authorization: `Bearer ${token}` };
+    const id = encodeURIComponent(fileId);
+    for (const path of [
+      `/backend-api/files/download/${id}?conversation_id=${encodeURIComponent(chatId)}&inline=false`,
+      `/backend-api/files/${id}/download`,
+    ]) {
+      try {
+        const res = await fetch(path, { credentials: 'include', headers, signal: ChatStamp.timeoutSignal() });
+        if (!res.ok) {
+          ChatStamp.info(`image link refused (${res.status}): ${path.split('?')[0]}`);
+          continue;
+        }
+        const { download_url: url } = await res.json();
+        if (!url) {
+          ChatStamp.info(`image link missing in reply: ${path.split('?')[0]}`);
+          continue;
+        }
+        // Only our own site gets the login token, never a file host.
+        const sameSite = new URL(url, location.origin).origin === location.origin;
+        const image = await ChatStamp.loadImage(url, sameSite ? headers : undefined);
+        if (image) return image;
+        ChatStamp.info('image file could not be read');
+      } catch (err) {
+        ChatStamp.info('image link failed:', err && err.message);
+      }
+    }
+    return null;
+  }
+
   ChatStamp.platforms.chatgpt = {
     id: 'chatgpt',
     hosts: ['chatgpt.com'],
@@ -31,6 +90,7 @@
     titleSelector: '.truncate, [dir="auto"]',
     // Push the label to the right edge of the row, like Claude's sidebar.
     alignLabelEnd: true,
+    shareButtonSelectors: ['[data-testid="share-chat-button"]'],
 
     chatIdFromUrl(url) {
       const match = new URL(url, location.origin).pathname.match(ID_PATTERN);
@@ -49,22 +109,46 @@
     // Creation time of each message on the branch currently shown, from the
     // same endpoint the app uses to load the chat. Message text is not kept.
     async fetchMessageTimes(chatId) {
-      const token = await getAccessToken();
-      const res = await fetch(`/backend-api/conversation/${encodeURIComponent(chatId)}`, {
-        credentials: 'include',
-        headers: { Authorization: `Bearer ${token}` },
-        signal: ChatStamp.timeoutSignal(),
-      });
-      if (!res.ok) throw new Error(`conversation ${res.status}`);
-      const data = await res.json();
-      const branch = ChatStamp.walkBranch(data.mapping || {}, data.current_node, (node) => node.parent);
       const times = [];
-      for (const { message } of branch) {
+      for (const { message } of await loadBranch(chatId)) {
         const role = message && message.author && message.author.role;
         const t = message && ChatStamp.toMillis(message.create_time);
         if (SHOWN_ROLES.has(role) && t) times.push({ id: message.id, role, t });
       }
       return times;
+    },
+
+    // The visible messages of the branch currently shown, for the print page.
+    async fetchConversation(chatId) {
+      const messages = [];
+      let budget = ChatStamp.MAX_IMAGES_PER_CHAT;
+      for (const { message } of await loadBranch(chatId)) {
+        const author = message && message.author && message.author.role;
+        if (!message || (!SHOWN_ROLES.has(author) && author !== 'tool')) continue;
+        if (message.metadata && message.metadata.is_visually_hidden_from_conversation) continue;
+        if (author === 'assistant' && message.recipient && message.recipient !== 'all') continue;
+        const { text, pointers } = messageParts(message);
+        // Tool messages only count for the images they produced, like generated pictures.
+        const body = author === 'tool' ? '' : text;
+        const images = [];
+        let missing = 0;
+        for (const pointer of pointers) {
+          const image = budget > 0 ? await loadPointer(pointer, chatId) : null;
+          if (image) {
+            images.push(image);
+            budget--;
+          } else {
+            missing++;
+          }
+        }
+        const notes = Array(missing).fill('*[Image]*');
+        const full = [body, ...notes].filter(Boolean).join('\n\n');
+        if (!full.trim() && !images.length) continue;
+        const entry = { role: author === 'tool' ? 'assistant' : author, t: ChatStamp.toMillis(message.create_time), text: full };
+        if (images.length) entry.images = images;
+        messages.push(entry);
+      }
+      return messages;
     },
 
     // Reads the same conversation list the app loads for its own sidebar.

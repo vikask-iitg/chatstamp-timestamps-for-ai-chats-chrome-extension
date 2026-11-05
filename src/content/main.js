@@ -10,6 +10,16 @@
     const adapter = Object.values(ChatStamp.platforms).find((p) => p.hosts.includes(location.hostname));
     if (!adapter) return;
 
+    // The print page asks for a chat's messages here, since this runs with the site's login.
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      if (!message || message.type !== 'chatstamp:conversation' || !adapter.fetchConversation) return false;
+      adapter
+        .fetchConversation(message.id)
+        .then((messages) => sendResponse({ ok: true, messages }))
+        .catch((err) => sendResponse({ ok: false, error: String((err && err.message) || err) }));
+      return true;
+    });
+
     const state = {
       adapter,
       settings: await ChatStamp.storage.getSettings(),
@@ -19,6 +29,7 @@
 
     const collector = ChatStamp.createCollector(state);
     const stamper = ChatStamp.createMessageStamper(state);
+    const pdfButton = ChatStamp.createPdfButton(state);
     let observer;
     let nav;
     let refreshTimer;
@@ -31,6 +42,7 @@
       clearInterval(refreshTimer);
       ChatStamp.injector.removeAll();
       stamper.removeAll();
+      pdfButton.remove();
     }
 
     state.render = ChatStamp.debounce(() => {
@@ -44,6 +56,11 @@
         stamper.apply();
       } catch (err) {
         ChatStamp.info('message render failed:', err);
+      }
+      try {
+        pdfButton.apply();
+      } catch (err) {
+        ChatStamp.info('PDF button failed:', err);
       }
     }, RENDER_DEBOUNCE_MS);
 

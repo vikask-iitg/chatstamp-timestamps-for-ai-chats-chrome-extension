@@ -25,6 +25,38 @@
     return orgIdsPromise;
   }
 
+  async function loadBranch(chatId) {
+    let data;
+    for (const org of await getOrgIds()) {
+      try {
+        data = await getJson(
+          `/api/organizations/${org}/chat_conversations/${encodeURIComponent(chatId)}?tree=True&rendering_mode=messages`
+        );
+        break;
+      } catch (err) {
+        ChatStamp.log('claude chat not in org', org, err);
+      }
+    }
+    if (!data) throw new Error('chat not found');
+
+    const messages = Array.isArray(data.chat_messages) ? data.chat_messages : [];
+    const byId = Object.fromEntries(messages.map((m) => [m.uuid, m]));
+    return data.current_leaf_message_uuid
+      ? ChatStamp.walkBranch(byId, data.current_leaf_message_uuid, (m) => m.parent_message_uuid)
+      : [...messages].sort((a, b) => a.index - b.index);
+  }
+
+  const roleOf = (m) => (m.sender === 'human' ? 'user' : 'assistant');
+
+  const blockText = (m) => {
+    const blocks = Array.isArray(m.content) ? m.content : [];
+    return blocks.filter((b) => b && b.type === 'text' && b.text).map((b) => b.text).join('\n\n') || m.text || '';
+  };
+
+  // Where an attached file's picture can be fetched, if it has one.
+  const imageUrlOf = (f) =>
+    (f.preview_asset && f.preview_asset.url) || f.preview_url || (f.thumbnail_asset && f.thumbnail_asset.url) || f.thumbnail_url || null;
+
   const USER_MESSAGE = '[data-testid="user-message"]';
   // Tried in order; the first selector that matches anything is used.
   const ASSISTANT_MESSAGES = ['[data-is-streaming]', '.font-claude-response'];
@@ -53,30 +85,40 @@
 
     // Creation time of each message on the branch currently shown. Message text is not kept.
     async fetchMessageTimes(chatId) {
-      let data;
-      for (const org of await getOrgIds()) {
-        try {
-          data = await getJson(
-            `/api/organizations/${org}/chat_conversations/${encodeURIComponent(chatId)}?tree=True&rendering_mode=messages`
-          );
-          break;
-        } catch (err) {
-          ChatStamp.log('claude chat not in org', org, err);
-        }
-      }
-      if (!data) throw new Error('chat not found');
-
-      const messages = Array.isArray(data.chat_messages) ? data.chat_messages : [];
-      const byId = Object.fromEntries(messages.map((m) => [m.uuid, m]));
-      const branch = data.current_leaf_message_uuid
-        ? ChatStamp.walkBranch(byId, data.current_leaf_message_uuid, (m) => m.parent_message_uuid)
-        : [...messages].sort((a, b) => a.index - b.index);
       const times = [];
-      for (const m of branch) {
+      for (const m of await loadBranch(chatId)) {
         const t = ChatStamp.toMillis(m.created_at);
-        if (t) times.push({ id: null, role: m.sender === 'human' ? 'user' : 'assistant', t });
+        if (t) times.push({ id: null, role: roleOf(m), t });
       }
       return times;
+    },
+
+    // The visible messages of the branch currently shown, for the print page.
+    async fetchConversation(chatId) {
+      const messages = [];
+      let budget = ChatStamp.MAX_IMAGES_PER_CHAT;
+      for (const m of await loadBranch(chatId)) {
+        const images = [];
+        const notes = [];
+        for (const file of [...(m.attachments || []), ...(m.files || []), ...(m.files_v2 || [])]) {
+          if (!file) continue;
+          const url = imageUrlOf(file);
+          const image = url && budget > 0 ? await ChatStamp.loadImage(url).catch(() => null) : null;
+          if (url && !image) ChatStamp.info('image file could not be read');
+          if (image) {
+            images.push(image);
+            budget--;
+          } else if (file.file_name || file.name) {
+            notes.push(`*[Attachment: ${file.file_name || file.name}]*`);
+          }
+        }
+        const text = [blockText(m), ...notes].filter(Boolean).join('\n\n');
+        if (!text.trim() && !images.length) continue;
+        const entry = { role: roleOf(m), t: ChatStamp.toMillis(m.created_at), text };
+        if (images.length) entry.images = images;
+        messages.push(entry);
+      }
+      return messages;
     },
 
     // Reads the same conversation list the app loads for its own sidebar.

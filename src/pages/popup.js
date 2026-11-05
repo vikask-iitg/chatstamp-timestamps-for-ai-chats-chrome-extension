@@ -7,6 +7,23 @@
   const QUERY_KEY = 'popupQuery';
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const siteButtons = document.querySelectorAll('#platform button');
+  const CALENDAR = '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>';
+  const calendarWith = (text) =>
+    `${CALENDAR}<text x="12" y="19" text-anchor="middle" font-size="8" font-weight="700" fill="currentColor" stroke="none">${text}</text>`;
+  const dropdowns = [
+    ChatStampDropdown($('range'), {
+      all: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+      today: `${CALENDAR}<circle cx="12" cy="15.5" r="1.8" fill="currentColor" stroke="none"/>`,
+      '7d': calendarWith('7'),
+      '30d': calendarWith('30'),
+      custom: '<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',
+    }),
+    ChatStampDropdown($('groupBy'), {
+      day: calendarWith('1'),
+      month: `${CALENDAR}<path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/>`,
+      none: '<path d="M4 6h16M4 12h16M4 18h16"/>',
+    }),
+  ];
 
   let settings;
   let records = [];
@@ -55,39 +72,48 @@
     return node;
   }
 
-  // Site logo bundled in icons/sites/, on a light tile.
+  // Site logo bundled in icons/sites/, on a light tile. It's the row's only site label.
   function badgeFor(platform) {
     const badge = el('span', 'badge');
-    badge.setAttribute('aria-hidden', 'true');
     const img = document.createElement('img');
     img.src = `../../icons/sites/${platform}.png`;
-    img.alt = '';
-    img.width = img.height = 18;
+    img.alt = ChatStamp.PLATFORM_NAMES[platform];
+    img.width = img.height = 20;
     badge.append(img);
     return badge;
   }
 
   function chatRow(record, words) {
-    const link = el('a', 'chat');
+    const chatTitle = record.t || 'Untitled chat';
+    const row = el('div', 'chat');
+
+    const link = el('a', 'chat-link');
     link.href = ChatStamp.search.chatUrl(record);
     link.addEventListener('click', (e) => {
       e.preventDefault();
       chrome.tabs.create({ url: link.href, active: !(e.metaKey || e.ctrlKey) });
     });
+    const title = el('span', 'title');
+    title.append(highlighted(chatTitle, words));
+    link.append(badgeFor(record.p), title);
+
+    const pdf = el('button', 'pdf-button');
+    pdf.type = 'button';
+    pdf.title = 'Save this chat as PDF';
+    pdf.setAttribute('aria-label', `Save ${chatTitle} as PDF`);
+    pdf.innerHTML =
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10.5l5 5 5-5M4 20.5h16"/></svg>PDF';
+    pdf.addEventListener('click', () => {
+      const query = new URLSearchParams({ p: record.p, id: record.id, t: chatTitle });
+      chrome.tabs.create({ url: chrome.runtime.getURL(`src/pages/print.html?${query}`) });
+    });
 
     const info = ChatStamp.format.describe(record, settings);
-    const badge = badgeFor(record.p);
+    const time = el('span', `tag--time${info.estimated ? ' estimated' : ''}`, `${info.estimated ? '~' : ''}${rowTime(info.ms)}`);
 
-    const body = el('span', 'body');
-    const title = el('span', 'title');
-    title.append(highlighted(record.t || 'Untitled chat', words));
-    body.append(title, el('span', 'site', ChatStamp.PLATFORM_NAMES[record.p]));
-
-    const time = el('span', `time${info.estimated ? ' estimated' : ''}`, `${info.estimated ? '~' : ''}${rowTime(info.ms)}`);
-
-    link.title = info.tooltip;
-    link.append(badge, body, time);
-    return link;
+    row.title = `${ChatStamp.PLATFORM_NAMES[record.p]}\n${info.tooltip}`;
+    row.append(link, pdf, time);
+    return row;
   }
 
   function emptyState(heading, text) {
@@ -105,6 +131,7 @@
     } catch {}
 
     $('customRange').hidden = query.range !== 'custom';
+    dropdowns.forEach((dropdown) => dropdown.sync());
     siteButtons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.platform === platform)));
 
     const matches = ChatStamp.search.filterRecords(records, query);
@@ -133,7 +160,7 @@
 
     for (const group of groups) {
       if (group.label) {
-        const heading = el('h2', 'group-label');
+        const heading = el('h3', 'group-label');
         heading.append(el('span', '', group.label), el('span', 'count', String(group.records.length)));
         results.append(heading);
       }

@@ -2,7 +2,15 @@
 
 > **Chrome Extension** for ChatGPT and Claude · Manifest V3 · No build step · All data stays on your device
 
-A Chrome extension (Manifest V3) that shows when each chat started in the ChatGPT and Claude sidebars, puts a date and time on every message, and lets you search your chats by title, site and date. No server, no account: all data stays in `chrome.storage.local`.
+A Chrome extension (Manifest V3) that adds the missing dates and times to ChatGPT and Claude, lets you search your chats, and prints any chat as a PDF. No server, no account: chat dates stay in `chrome.storage.local`, and message text is never stored.
+
+## Features
+
+- **Dates in the sidebar:** every chat shows when it started, including chats from before you installed the extension.
+- **A time on every message:** the date and time appear above each message inside a chat.
+- **Search popup:** find a chat by title, site or date range, grouped by day or month.
+- **Print as PDF:** save a clean copy of a chat, with its formatting, times and images, from a button beside Share or from the popup.
+- **Your controls:** one switch to turn all timestamps off, light and dark themes, 12- or 24-hour clock, per-site switches, and JSON export and import.
 
 ## Screenshots
 
@@ -14,10 +22,10 @@ Every chat in the sidebar shows when it started: the time for today, "Yesterday"
 
 ### Search popup
 
-Click the toolbar icon to search chat titles across both sites, filter by site and date range, and group by day or month. Two switches sit in the header: one turns all timestamps on the chat sites on or off, the other switches between light and dark mode (light is the default).
+Click the toolbar icon to search chat titles across both sites, filter by site and date range, and group by day or month. Each row has a PDF button. Two switches sit in the header: one turns all timestamps on the chat sites on or off (green is on, red is off), the other switches between light and dark mode (light is the default).
 
 <p>
-  <img src="docs/screenshots/popup-light.png" width="380" alt="ChatStamp popup in light mode, listing chats from ChatGPT and Claude grouped under Today and Yesterday, each with its site logo and time">
+  <img src="docs/screenshots/popup-light.png" width="380" alt="ChatStamp popup in light mode, listing sample chats from ChatGPT and Claude grouped by day, each with its site logo, a PDF button and its time">
   <img src="docs/screenshots/popup-dark.png" width="380" alt="The same popup in dark mode">
 </p>
 
@@ -32,6 +40,18 @@ Each message gets its date and time just above it: on the right for your message
 Your messages show the time on the right at the top of the bubble; Claude's replies show it on the left.
 
 <img src="docs/screenshots/claude-messages.png" width="700" alt="A Claude conversation on desktop: 24 Oct 2026, 6:06 PM shown at the top right of the user's message 'How does a VPN works' and above Claude's reply on the left">
+
+### Print a chat as PDF
+
+Click **Print as PDF** beside Share in a chat, or **PDF** in the popup. The chat opens as a clean document and Chrome's print dialog appears: choose **Save as PDF**. The chat's title becomes the suggested file name.
+
+<img src="docs/screenshots/pdf-export.png" width="560" alt="A sample chat shown as a clean document, with the title, an image, a table and the time of each message, ready to save as PDF">
+
+Images that can't be fetched show as `[Image]`. A PDF includes up to 40 images, each up to 8 MB, and leaves out tool calls, the AI's hidden reasoning and older versions of edited messages.
+
+### Settings
+
+<img src="docs/screenshots/settings.png" width="700" alt="ChatStamp settings page with a sidebar of General, Sites, Your data and About, and options for the sidebar label format, clock, message times, the Print as PDF button and theme">
 
 ## Load it
 
@@ -49,7 +69,7 @@ Development (unpacked) installs log adapter failures to the console with the pre
 node --test
 ```
 
-Covers date formatting, the storage merge rules, search, grouping and export/import. Selectors and endpoints can only be checked against the live sites (see the QA checklist below).
+Covers date formatting, the storage merge rules, search, grouping, export/import, Markdown rendering and escaping, reading chats for PDF export, and extension-page rules (no inline scripts, no broken local links). Selectors and endpoints can only be checked against the live sites (see the QA checklist below).
 
 ## How it works
 
@@ -58,13 +78,17 @@ Covers date formatting, the storage merge rules, search, grouping and export/imp
 | Platform adapters | `src/platforms/*.js` | Selectors, chat-ID patterns and metadata endpoints, one file per site (FR-1, FR-2) |
 | Collector | `src/content/collector.js` | Records first-seen times; pulls real creation times from the site's own chat list (FR-3, FR-4) |
 | Message stamper | `src/content/messages.js` | Date and time above each message, right for yours and left for replies in the open chat; matched by message id (ChatGPT) or by position per role (Claude) |
+| Print page | `src/pages/print.*`, `src/shared/markdown.js` | Shows a chat as a clean document for Chrome's Save as PDF; message text stays in that tab's memory |
+| PDF button | `src/content/pdfbutton.js` | Adds a Print as PDF button beside the site's Share button; `src/background.js` opens the print page |
 | Injector | `src/content/injector.js` | Adds a label beside each sidebar chat and keeps it there as the sidebar re-renders (FR-5, FR-7, FR-8) |
 | Navigation watcher | `src/content/navigation.js` | Catches in-app route changes so new chats are recorded (FR-6) |
 | Entry point | `src/content/main.js` | Picks the adapter, wires everything up, MutationObserver with 150 ms debounce |
 | Popup | `src/pages/popup.*` | Toolbar popup: search titles across sites, filter by site and date range (FR-10), group by day or month (FR-11) |
 | Search logic | `src/shared/search.js` | Filtering, grouping, chat URLs, JSON export/import parsing |
-| Settings | `src/pages/options.*` | Date format, clock, per-site toggles (FR-9), JSON export and import (FR-12), clear all data (FR-13) |
+| Menus | `src/pages/dropdown.js` | Styled menus with icons for the popup and Settings, backed by hidden `<select>`s |
+| Settings | `src/pages/options.*` | Date format, clock, theme, message times, PDF button, per-site toggles (FR-9), JSON export and import (FR-12), clear all data (FR-13) |
 | Welcome page | `src/pages/welcome.html` | Opens once after install |
+| Privacy page | `src/pages/privacy.*` | Shows `PRIVACY.md` inside the extension |
 
 Stored record, one key per chat (`c:<platform>:<chatId>`):
 
@@ -90,6 +114,11 @@ Labels disappearing usually means a selector broke. Fix it in that site's file i
 - `linkSelectors`: tried in order; the first one that matches anything is used. The last entry is a broad URL-pattern fallback.
 - `titleSelector`: the label is inserted right after this element inside each link. If it isn't found, the label is appended to the link.
 - `fetchMetadata`: endpoint and field names.
+- `messageElements`: how messages are found in the page, for message times.
+- `fetchMessageTimes`, `fetchConversation`: chat and image endpoints. These are undocumented too.
+- `shareButtonSelectors`: where the Print as PDF button goes. If none match, it looks for a button named "Share" near the top of the page.
+
+ChatGPT replies can contain layout tags like `<box>` and `<Entity>`. If they appear in a PDF, the cleanup is `stripChatUiTags` in `src/shared/markdown.js`.
 
 ## QA checklist
 
@@ -102,12 +131,17 @@ Labels disappearing usually means a selector broke. Fix it in that site's file i
 - [ ] Settings: format and clock changes update open tabs live; turning a site off removes its labels
 - [ ] Popup: search matches titles across sites; site, date-range and custom from/to filters work; clicking a result opens the chat
 - [ ] Popup: grouping by day/month/none works and is remembered
+- [ ] Popup menus: mouse, arrow keys, Enter, Escape and clicking outside all work; Escape closes only the menu
 - [ ] Export downloads a JSON file; importing it into a fresh profile restores the dates
 - [ ] Open a chat: every message shows its date and time (AM/PM by default); hover shows seconds
 - [ ] Send a new message: its time appears within about 10 seconds
-- [ ] Settings: unticking "Show date and time on each message" removes them
+- [ ] Settings: turning off "Time on each message" removes them
 - [ ] Popup timestamps switch: off removes sidebar and message labels from open tabs without a reload, on brings them back; the popup still lists chats and says "timestamps off"
+- [ ] Popup PDF button: opens a formatted copy of the chat and the print dialog, with the chat's title as the file name; works with no site tab open, and shows a clear message when signed out
+- [ ] PDF of a chat with uploaded images on ChatGPT and Claude: images appear; one that can't load shows [Image]
+- [ ] Print as PDF button beside Share on ChatGPT and Claude: opens the print page for that chat, returns after the header redraws, is absent on non-chat pages, and hides with its Settings switch
+- [ ] Settings: About this extension and Privacy policy open from the footer, and the policy text loads
 - [ ] Clear all data removes every label
 - [ ] Block the metadata endpoint in DevTools (Network → Block request URL); the site still works and opened chats get `~` dates
 
-See `PRIVACY.md` for the privacy policy.
+See [`PRIVACY.md`](PRIVACY.md) for the privacy policy.

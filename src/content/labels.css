@@ -55,6 +55,28 @@
   text-align: left;
 }
 
+/* PDF button beside the site's Share button, in ChatStamp yellow on any site theme. */
+.chatstamp-pdf {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  gap: 5px;
+  height: 32px;
+  margin-right: 4px;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #211b0b;
+  white-space: nowrap;
+  background: #f4b947;
+  border: 0;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.chatstamp-pdf:hover { background: #f7c766; }
+.chatstamp-pdf:focus-visible { outline: 2px solid #f4b947; outline-offset: 2px; }
+
 /* Visually hidden text that screen readers include in the link's name. */
 .chatstamp .chatstamp-sr {
   position: absolute;

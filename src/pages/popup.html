@@ -9,10 +9,10 @@
 </head>
 <body class="popup">
   <header class="topbar">
-    <img src="../../icons/icon48.png" width="26" height="26" alt="">
+    <img src="../../icons/icon128.png" width="36" height="36" alt="">
     <div class="brand">
-      <h1>ChatStamp: Timestamps for AI Chats</h1>
-      <p id="summary" role="status"></p>
+      <h1>Chat<span class="word-stamp">Stamp</span></h1>
+      <p>Timestamps for AI Chats</p>
     </div>
     <button type="button" class="power-switch" id="toggleTimestamps" role="switch" aria-checked="true" aria-label="Show timestamps on ChatGPT and Claude">
       <span class="knob">
@@ -41,6 +41,10 @@
   </header>
 
   <section class="controls">
+    <div class="section-head">
+      <h2>Find a chat</h2>
+      <p id="summary" role="status"></p>
+    </div>
     <div class="search">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
         <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
@@ -82,10 +86,12 @@
 
   <main id="results"></main>
 
+
   <script src="../shared/core.js"></script>
   <script src="../shared/format.js"></script>
   <script src="../shared/storage.js"></script>
   <script src="../shared/search.js"></script>
+  <script src="dropdown.js"></script>
   <script src="popup.js"></script>
 </body>
 </html>

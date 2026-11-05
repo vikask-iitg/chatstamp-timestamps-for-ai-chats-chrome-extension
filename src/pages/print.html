@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Save chat as PDF</title>
+  <link rel="stylesheet" href="print.css">
+</head>
+<body>
+  <div class="toolbar" id="toolbar">
+    <p id="state" role="status">Loading your chat and images…</p>
+    <button type="button" id="savePdf" hidden>Save as PDF</button>
+    <button type="button" id="retry" hidden>Try again</button>
+  </div>
+
+  <main id="document" hidden>
+    <header class="doc-head">
+      <h1 id="title"></h1>
+      <p id="meta"></p>
+    </header>
+    <div id="messages"></div>
+    <footer class="doc-foot">Exported with ChatStamp: Timestamps for AI Chats</footer>
+  </main>
+
+  <script src="../shared/core.js"></script>
+  <script src="../shared/format.js"></script>
+  <script src="../shared/storage.js"></script>
+  <script src="../shared/markdown.js"></script>
+  <script src="print.js"></script>
+</body>
+</html>
