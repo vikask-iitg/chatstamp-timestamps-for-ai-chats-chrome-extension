@@ -14,6 +14,13 @@
 
   const chatUrl = (record) => (CHAT_URLS[record.p] ? CHAT_URLS[record.p](encodeURIComponent(record.id)) : null);
 
+  // True for a chat with no title yet, or only the site's "New chat" placeholder.
+  // These are often empty chats the site itself doesn't list, so the popup leaves them out.
+  const isPlaceholder = (record) => {
+    const title = (record.t || '').trim().toLowerCase();
+    return !title || title === 'new chat';
+  };
+
   // The date a record is shown and filtered by: real creation time, else first seen.
   const dateOf = (record) => record.c || record.f || 0;
 
@@ -140,5 +147,5 @@
     return { records, skipped };
   }
 
-  ChatStamp.search = { chatUrl, dateOf, filterRecords, groupRecords, buildExport, parseImport };
+  ChatStamp.search = { chatUrl, isPlaceholder, dateOf, filterRecords, groupRecords, buildExport, parseImport };
 })();

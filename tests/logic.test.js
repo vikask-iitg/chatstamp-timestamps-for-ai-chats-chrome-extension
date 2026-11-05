@@ -205,3 +205,13 @@ test('the timestamps switch removes sidebar and message labels', () => {
   assert.deepStrictEqual(removed, ['sidebar', 'message']);
   assert.strictEqual(ChatStamp.DEFAULT_SETTINGS.timestamps, true);
 });
+
+test('placeholder chats are recognised', () => {
+  const placeholder = (t) => ChatStamp.search.isPlaceholder({ p: 'chatgpt', id: 'x', t });
+  assert.strictEqual(placeholder('New chat'), true);
+  assert.strictEqual(placeholder('  new CHAT '), true);
+  assert.strictEqual(placeholder(''), true);
+  assert.strictEqual(placeholder(undefined), true);
+  assert.strictEqual(placeholder('New chat ideas for my app'), false);
+  assert.strictEqual(placeholder('Sentence correction'), false);
+});

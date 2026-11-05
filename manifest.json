@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "ChatStamp: Timestamps for AI Chats",
-  "version": "0.5.0",
+  "version": "0.5.3",
   "description": "Shows when each chat started in the ChatGPT and Claude sidebars. All data stays on your device.",
   "permissions": ["storage"],
   "background": {

@@ -244,7 +244,7 @@
 
   (async () => {
     settings = await ChatStamp.storage.getSettings();
-    records = await ChatStamp.storage.getRecords();
+    records = (await ChatStamp.storage.getRecords()).filter((r) => !ChatStamp.search.isPlaceholder(r));
     ChatStampTheme.set(settings.theme);
     renderThemeButton();
     renderTimestampsSwitch();
