@@ -14,12 +14,6 @@ A Chrome extension (Manifest V3) that adds the missing dates and times to ChatGP
 
 ## Screenshots
 
-### Chat start times in the sidebar
-
-Every chat in the sidebar shows when it started: the time for today, "Yesterday" or the weekday for this week, and the date for older chats. Hover a label for the full date and time.
-
-<img src="docs/screenshots/chatgpt-sidebar.png" width="390" alt="ChatGPT sidebar where each recent chat shows its start time on the right, such as Yesterday 3:17 PM, Wed 2:53 PM, Tue 10:54 PM and 15 Oct, 6:54 PM">
-
 ### Search popup
 
 Click the toolbar icon to search chat titles across both sites, filter by site and date range, and group by day or month. Each row has a PDF button. Two switches sit in the header: one turns all timestamps on the chat sites on or off (green is on, red is off), the other switches between light and dark mode (light is the default).
@@ -28,6 +22,12 @@ Click the toolbar icon to search chat titles across both sites, filter by site a
   <img src="docs/screenshots/popup-light.png" width="380" alt="ChatStamp popup in light mode, listing sample chats from ChatGPT and Claude grouped by day, each with its site logo, a PDF button and its time">
   <img src="docs/screenshots/popup-dark.png" width="380" alt="The same popup in dark mode">
 </p>
+
+### Chat start times in the sidebar
+
+Every chat in the sidebar shows when it started: the time for today, "Yesterday" or the weekday for this week, and the date for older chats. Hover a label for the full date and time.
+
+<img src="docs/screenshots/chatgpt-sidebar.png" width="390" alt="ChatGPT sidebar where each recent chat shows its start time on the right, such as Yesterday 3:17 PM, Wed 2:53 PM, Tue 10:54 PM and 15 Oct, 6:54 PM">
 
 ### Message times in ChatGPT
 
